@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-  net:
+  infringements_network:
     driver: bridge
 
 services:
@@ -9,28 +9,46 @@ services:
     image: infringements-analyzer
     container_name: infringements-analyzer
     restart: unless-stopped
+    networks:
+      - infringements_network
     environment:
       - DISPLAY_IMAGES=false
       - HAAR_CASCADE_PATH=/infringements/src/cars.xml
-      - API_ENDPOINT=
+      - API_ENDPOINT=http://172.17.173.99:7777/api/incident/
       - STORAGE_PATH=/infringements/storage
     volumes:
       - /infringements/analyzer/storage:/infringements/storage
+    depends_on:
+      - infringements-backend
   infringements-backend:
     image: infringements-backend
     container_name: infringements-backend
     restart: unless-stopped
+    networks:
+      - infringements_network
     ports:
-      - 7777:6000
+      - 7777:8000
     environment:
-      - PORT=6000
+      - PORT=8000
+      - DATABASE_HOST=172.17.173.99
+      - DATABASE_PORT=4444
+      - DATABASE_NAME=infringements
+      - DATABASE_USER=infringements_user
+      - DATABASE_PASS=infringements_user_123
+      - STORAGE_PATH=/infringements/storage/
     volumes:
       - /infringements/analyzer/storage:/infringements/storage
-      - /infringements/client_build:/infringements/client_build
+      - /infringements/client_build:/infringements/static
+    depends_on:
+      - infringements-postgres
   infringements-postgres:
     image: postgres:latest
     container_name: infringements-postgres
     restart: unless-stopped
+    networks:
+      - infringements_network
+    ports:
+      - 4444:5432
     environment:
       - POSTGRES_USER=infringements_user
       - POSTGRES_PASSWORD=infringements_user_123
