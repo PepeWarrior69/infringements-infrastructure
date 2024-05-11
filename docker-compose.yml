@@ -1,0 +1,39 @@
+version: '3.8'
+
+networks:
+  net:
+    driver: bridge
+
+services:
+  infringements-analyzer:
+    image: infringements-analyzer
+    container_name: infringements-analyzer
+    restart: unless-stopped
+    environment:
+      - DISPLAY_IMAGES=false
+      - HAAR_CASCADE_PATH=/infringements/src/cars.xml
+      - API_ENDPOINT=
+      - STORAGE_PATH=/infringements/storage
+    volumes:
+      - /infringements/analyzer/storage:/infringements/storage
+  infringements-backend:
+    image: infringements-backend
+    container_name: infringements-backend
+    restart: unless-stopped
+    ports:
+      - 7777:6000
+    environment:
+      - PORT=6000
+    volumes:
+      - /infringements/analyzer/storage:/infringements/storage
+      - /infringements/client_build:/infringements/client_build
+  infringements-postgres:
+    image: postgres:latest
+    container_name: infringements-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=infringements_user
+      - POSTGRES_PASSWORD=infringements_user_123
+      - POSTGRES_DB=infringements
+    volumes:
+      - /infringements/postgres/data:/var/lib/postgresql/data
