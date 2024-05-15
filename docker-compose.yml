@@ -13,7 +13,7 @@ services:
       - infringements_network
     environment:
       - DISPLAY_IMAGES=false
-      - HAAR_CASCADE_PATH=/infringements/src/cars.xml
+      - HAAR_CASCADE_PATH=/infringements/src/cars_2.xml
       - API_ENDPOINT=http://172.17.173.99:7777/api/incident/
       - STORAGE_PATH=/infringements/storage
     volumes:
